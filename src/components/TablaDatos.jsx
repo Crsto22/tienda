@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../firebaseConfig";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, deleteDoc, doc } from "firebase/firestore";
 
 const TablaDatos = () => {
   const [productos, setProductos] = useState([]);
@@ -41,6 +41,16 @@ const TablaDatos = () => {
     const cantidad = producto.cantidad || 0;
     return total + precio * cantidad;
   }, 0);
+
+  // Función para eliminar un producto
+  const eliminarProducto = async (id) => {
+    try {
+      await deleteDoc(doc(db, "productos", id));
+
+    } catch (error) {
+      console.error("Error al eliminar el producto: ", error);
+    }
+  };
 
   return (
     <div className="w-full px-4 sm:px-0">
@@ -84,6 +94,9 @@ const TablaDatos = () => {
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Total
               </th>
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Acciones
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -110,12 +123,20 @@ const TablaDatos = () => {
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 font-semibold">
                       {formatearPrecioSoles(totalProducto)}
                     </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
+                      <button
+                        onClick={() => eliminarProducto(producto.id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        Eliminar
+                      </button>
+                    </td>
                   </tr>
                 );
               })
             ) : (
               <tr>
-                <td colSpan="6" className="px-4 py-3 text-sm text-center text-gray-500">
+                <td colSpan="7" className="px-4 py-3 text-sm text-center text-gray-500">
                   No hay productos registrados
                 </td>
               </tr>
@@ -155,6 +176,16 @@ const TablaDatos = () => {
                       <p className="text-gray-500 font-medium">Total</p>
                       <p className="font-semibold text-green-600">{formatearPrecioSoles(totalProducto)}</p>
                     </div>
+                  </div>
+
+                  {/* Botón de eliminar en la vista móvil */}
+                  <div className="mt-4">
+                    <button
+                      onClick={() => eliminarProducto(producto.id)}
+                      className="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700"
+                    >
+                      Eliminar
+                    </button>
                   </div>
                 </div>
               );
