@@ -4,13 +4,16 @@ import { collection, addDoc } from "firebase/firestore";
 
 const Formulario = () => {
   const [nombre, setNombre] = useState("");
-  const [descripcion, setDescripcion] = useState("");
+  const [precioVenta, setPrecioVenta] = useState("");
   const [tieneFechaVencimiento, setTieneFechaVencimiento] = useState(false);
   const [fechaVencimiento, setFechaVencimiento] = useState("");
-  const [precio, setPrecio] = useState("");
+  const [precioProveedor, setPrecioProveedor] = useState("");
   const [cantidad, setCantidad] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
+
+  // Calcular el precio total
+  const precioTotal = (parseFloat(precioProveedor) || 0) * (parseInt(cantidad) || 0);
 
   const guardarDatos = async (e) => {
     e.preventDefault();
@@ -20,18 +23,18 @@ const Formulario = () => {
     try {
       await addDoc(collection(db, "productos"), {
         nombre: nombre,
-        descripcion: descripcion,
+        descripcion: precioVenta, // Aquí se guarda el precio de venta como "descripcion"
         tiene_fecha_vencimiento: tieneFechaVencimiento,
         fecha_vencimiento: tieneFechaVencimiento ? fechaVencimiento : null,
-        precio: parseFloat(precio),
+        precio: parseFloat(precioProveedor), // Aquí se guarda el precio proveedor como "precio"
         cantidad: parseInt(cantidad),
       });
       // Limpiar el formulario
       setNombre("");
-      setDescripcion("");
+      setPrecioVenta("");
       setTieneFechaVencimiento(false);
       setFechaVencimiento("");
-      setPrecio("");
+      setPrecioProveedor("");
       setCantidad("");
       // Mostrar mensaje de éxito
       setMensaje({ texto: "Producto guardado exitosamente", tipo: "exito" });
@@ -77,13 +80,19 @@ const Formulario = () => {
         </div>
         
         <div className="space-y-1 sm:space-y-2">
-          <label className="block text-sm font-medium text-gray-700">Descripción:</label>
-          <textarea
-            value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
-            placeholder="Ingrese descripción del producto"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-20 sm:h-24"
-          />
+          <label className="block text-sm font-medium text-gray-700">Precio de Venta:</label>
+          <div className="relative">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">S/</span>
+            <input
+              type="number"
+              step="0.01"
+              value={precioVenta}
+              onChange={(e) => setPrecioVenta(e.target.value)}
+              required
+              placeholder="0.00"
+              className="w-full px-3 py-2 pl-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
         </div>
         
         {/* Toggle para fecha de vencimiento */}
@@ -129,17 +138,31 @@ const Formulario = () => {
         </div>
         
         <div className="space-y-1 sm:space-y-2">
-          <label className="block text-sm font-medium text-gray-700">Precio:</label>
+          <label className="block text-sm font-medium text-gray-700">Precio Proveedor:</label>
           <div className="relative">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">S/</span>
             <input
               type="number"
               step="0.01"
-              value={precio}
-              onChange={(e) => setPrecio(e.target.value)}
+              value={precioProveedor}
+              onChange={(e) => setPrecioProveedor(e.target.value)}
               required
               placeholder="0.00"
               className="w-full px-3 py-2 pl-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+
+        {/* Campo de Precio Total */}
+        <div className="space-y-1 sm:space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Precio Total:</label>
+          <div className="relative">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">S/</span>
+            <input
+              type="text"
+              value={precioTotal.toFixed(2)}
+              readOnly
+              className="w-full px-3 py-2 pl-8 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </div>
